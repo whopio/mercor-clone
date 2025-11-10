@@ -113,24 +113,33 @@ export default function RecruiterSubmissionsView() {
   };
 
   const handleMarkComplete = async (submissionId: string) => {
+    // Confirm action
+    if (!confirm('Are you sure you want to mark this submission as complete and process the payment? This action will debit your account balance and transfer funds to the earner.')) {
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/submissions/${submissionId}`, {
-        method: 'PUT',
+      const response = await fetch(`/api/submissions/${submissionId}/complete`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: 'Completed' }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        console.error('Failed to mark as complete');
+        alert(`Error: ${data.error || 'Failed to complete submission'}`);
         return;
       }
+
+      alert(`Success! Payment of ${formatCurrency(data.transfer.amount, data.transfer.currency)} has been sent to the earner. Platform fee: ${formatCurrency(data.transfer.platformFee, data.transfer.currency)}`);
 
       // Refresh submissions
       fetchSubmissions();
     } catch (error) {
       console.error('Error marking as complete:', error);
+      alert('An unexpected error occurred. Please try again.');
     }
   };
 

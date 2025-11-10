@@ -28,6 +28,7 @@ model User {
   submissions   Submission[]   @relation("EarnerSubmissions")
   payments      Payment[]      @relation("RecruiterPayments")
   ledgerEntries LedgerEntry[]  @relation("RecruiterLedgerEntries")
+  whopCompany   WhopCompany?   @relation("EarnerWhopCompany")
 }
 
 model Account {
@@ -91,6 +92,7 @@ model Submission {
   status            String   @default("Pending Acceptance") // Pending Acceptance, Requires Completion, Pending Delivery Review, Completed, Rejected
   submittedAt       DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  transferId        String?  @unique // Whop transfer ID for payout
 
   listingId   String
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
@@ -136,4 +138,19 @@ model LedgerEntry {
 
   @@index([recruiterId])
   @@index([paymentId])
+}
+
+model WhopCompany {
+  id        String   @id @default(cuid())
+  title     String
+  whopId    String   @unique // The Whop company ID (biz_xxxxx)
+  metadata  Json?    // Store full company data from Whop
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation("EarnerWhopCompany", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([whopId])
 }

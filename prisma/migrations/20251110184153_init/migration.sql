@@ -107,6 +107,19 @@ CREATE TABLE "LedgerEntry" (
     CONSTRAINT "LedgerEntry_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "WhopCompany" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "whopId" TEXT NOT NULL,
+    "metadata" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "WhopCompany_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -140,6 +153,18 @@ CREATE INDEX "LedgerEntry_recruiterId_idx" ON "LedgerEntry"("recruiterId");
 -- CreateIndex
 CREATE INDEX "LedgerEntry_paymentId_idx" ON "LedgerEntry"("paymentId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "WhopCompany_whopId_key" ON "WhopCompany"("whopId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "WhopCompany_userId_key" ON "WhopCompany"("userId");
+
+-- CreateIndex
+CREATE INDEX "WhopCompany_userId_idx" ON "WhopCompany"("userId");
+
+-- CreateIndex
+CREATE INDEX "WhopCompany_whopId_idx" ON "WhopCompany"("whopId");
+
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -163,3 +188,6 @@ ALTER TABLE "LedgerEntry" ADD CONSTRAINT "LedgerEntry_recruiterId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "LedgerEntry" ADD CONSTRAINT "LedgerEntry_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WhopCompany" ADD CONSTRAINT "WhopCompany_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

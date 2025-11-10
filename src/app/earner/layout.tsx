@@ -50,6 +50,16 @@ export default function EarnerLayout({
               >
                 My Submissions
               </button>
+              <button
+                onClick={() => handleTabChange('payouts')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  pathname === '/earner/payouts'
+                    ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+              >
+                Payouts
+              </button>
             </div>
           </div>
         </div>

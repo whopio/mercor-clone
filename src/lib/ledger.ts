@@ -1,5 +1,6 @@
 import { prisma } from './prisma';
 import { randomBytes } from 'crypto';
+import type { Prisma } from '@prisma/client';
 
 interface CreateLedgerEntryParams {
   recruiterId: string;
@@ -8,14 +9,19 @@ interface CreateLedgerEntryParams {
   transactionType: 'credit' | 'debit';
   description: string;
   idempotencyKey?: string;
+  paymentId?: string;
 }
 
 /**
  * Creates a ledger entry for a recruiter
  * @param params - The ledger entry parameters
+ * @param tx - Optional Prisma transaction client
  * @returns The created ledger entry
  */
-export async function createLedgerEntry(params: CreateLedgerEntryParams) {
+export async function createLedgerEntry(
+  params: CreateLedgerEntryParams,
+  tx?: Omit<Prisma.TransactionClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>
+) {
   const {
     recruiterId,
     amount,
@@ -23,10 +29,13 @@ export async function createLedgerEntry(params: CreateLedgerEntryParams) {
     transactionType,
     description,
     idempotencyKey = randomBytes(16).toString('hex'),
+    paymentId,
   } = params;
 
+  const client = tx || prisma;
+
   // Check if entry with this idempotency key already exists
-  const existingEntry = await prisma.ledgerEntry.findUnique({
+  const existingEntry = await client.ledgerEntry.findUnique({
     where: { idempotencyKey },
   });
 
@@ -36,7 +45,7 @@ export async function createLedgerEntry(params: CreateLedgerEntryParams) {
   }
 
   // Create the ledger entry
-  const entry = await prisma.ledgerEntry.create({
+  const entry = await client.ledgerEntry.create({
     data: {
       amount,
       currency,
@@ -44,6 +53,7 @@ export async function createLedgerEntry(params: CreateLedgerEntryParams) {
       description,
       idempotencyKey,
       recruiterId,
+      paymentId,
     },
   });
 
