@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Swift Gig specific relations
+  listings      Listing[]      @relation("RecruiterListings")
+  submissions   Submission[]   @relation("EarnerSubmissions")
+  payments      Payment[]      @relation("RecruiterPayments")
+  ledgerEntries LedgerEntry[]  @relation("RecruiterLedgerEntries")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Swift Gig specific models
+model Listing {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  currency    String   @default("USD") // USD, EUR, GBP, etc.
+  duration    String
+  type        String   // Remote or On-site
+  status      String   @default("Active") // Active, Filled, Closed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  recruiterId String
+  recruiter   User   @relation("RecruiterListings", fields: [recruiterId], references: [id], onDelete: Cascade)
+
+  submissions Submission[]
+}
+
+model Submission {
+  id                String   @id @default(cuid())
+  message           String   // Why they should be accepted
+  deliveryMaterials String?  // Link or description of completed work
+  status            String   @default("Pending Acceptance") // Pending Acceptance, Requires Completion, Pending Delivery Review, Completed, Rejected
+  submittedAt       DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  earnerId    String
+  earner      User     @relation("EarnerSubmissions", fields: [earnerId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, earnerId])
+}
+
+model Payment {
+  id         String   @id // Whop payment ID
+  amount     Decimal  @db.Decimal(10, 2)
+  currency   String
+  status     String   // pending, succeeded, failed, etc.
+  metadata   Json?    // Store full metadata from Whop
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  recruiterId String
+  recruiter   User   @relation("RecruiterPayments", fields: [recruiterId], references: [id], onDelete: Cascade)
+
+  ledgerEntries LedgerEntry[]
+
+  @@index([recruiterId])
+  @@index([status])
+}
+
+model LedgerEntry {
+  id              String   @id @default(cuid())
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  transactionType String   // credit or debit
+  description     String?  // Optional description of the transaction
+  idempotencyKey  String   @unique // Prevents duplicate transactions
+  createdAt       DateTime @default(now())
+
+  recruiterId String
+  recruiter   User   @relation("RecruiterLedgerEntries", fields: [recruiterId], references: [id], onDelete: Cascade)
+
+  paymentId String?
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([recruiterId])
+  @@index([paymentId])
+}

@@ -1,56 +1,64 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import ViewSubmissionDetailsModal from '@/components/ViewSubmissionDetailsModal';
+
+interface Submission {
+  id: string;
+  message: string;
+  deliveryMaterials: string | null;
+  status: string;
+  submittedAt: string;
+  listing: {
+    id: string;
+    title: string;
+    amount: number;
+    currency: string;
+  };
+  earner: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
+}
+
 export default function RecruiterSubmissionsView() {
-  // Sample submissions for recruiter to review
-  const submissions = [
-    {
-      id: 1,
-      gigTitle: 'Social Media Content Creation',
-      earnerName: 'Sarah Johnson',
-      earnerEmail: 'sarah.j@example.com',
-      submittedDate: '2025-11-08',
-      status: 'Pending Review',
-      pay: '$500',
-      portfolioLink: 'https://portfolio.example.com',
-    },
-    {
-      id: 2,
-      gigTitle: 'Social Media Content Creation',
-      earnerName: 'Mike Chen',
-      earnerEmail: 'mike.c@example.com',
-      submittedDate: '2025-11-07',
-      status: 'Pending Review',
-      pay: '$500',
-      portfolioLink: 'https://portfolio.example.com',
-    },
-    {
-      id: 3,
-      gigTitle: 'Product Photography',
-      earnerName: 'Emily Davis',
-      earnerEmail: 'emily.d@example.com',
-      submittedDate: '2025-11-06',
-      status: 'Approved',
-      pay: '$800',
-      portfolioLink: 'https://portfolio.example.com',
-    },
-    {
-      id: 4,
-      gigTitle: 'Product Photography',
-      earnerName: 'Alex Martinez',
-      earnerEmail: 'alex.m@example.com',
-      submittedDate: '2025-11-09',
-      status: 'Completed',
-      pay: '$800',
-      portfolioLink: 'https://portfolio.example.com',
-    },
-  ];
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+
+  const fetchSubmissions = async () => {
+    try {
+      const response = await fetch('/api/submissions/recruiter');
+      const data = await response.json();
+      setSubmissions(data.submissions || []);
+    } catch (error) {
+      console.error('Failed to fetch submissions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, []);
+
+  const formatCurrency = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Pending Review':
+      case 'Pending Acceptance':
         return 'bg-yellow-100 text-yellow-800';
-      case 'Approved':
+      case 'Requires Completion':
         return 'bg-green-100 text-green-800';
+      case 'Pending Delivery Review':
+        return 'bg-purple-100 text-purple-800';
       case 'Completed':
         return 'bg-blue-100 text-blue-800';
       case 'Rejected':
@@ -60,22 +68,106 @@ export default function RecruiterSubmissionsView() {
     }
   };
 
-  const getActionButton = (status: string, submissionId: number) => {
+  const handleApprove = async (submissionId: string) => {
+    try {
+      const response = await fetch(`/api/submissions/${submissionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'Requires Completion' }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to approve submission');
+        return;
+      }
+
+      // Refresh submissions
+      fetchSubmissions();
+    } catch (error) {
+      console.error('Error approving submission:', error);
+    }
+  };
+
+  const handleReject = async (submissionId: string) => {
+    try {
+      const response = await fetch(`/api/submissions/${submissionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'Rejected' }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to reject submission');
+        return;
+      }
+
+      // Refresh submissions
+      fetchSubmissions();
+    } catch (error) {
+      console.error('Error rejecting submission:', error);
+    }
+  };
+
+  const handleMarkComplete = async (submissionId: string) => {
+    try {
+      const response = await fetch(`/api/submissions/${submissionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'Completed' }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to mark as complete');
+        return;
+      }
+
+      // Refresh submissions
+      fetchSubmissions();
+    } catch (error) {
+      console.error('Error marking as complete:', error);
+    }
+  };
+
+  const handleViewDetails = (submission: Submission) => {
+    setSelectedSubmission(submission);
+    setIsDetailsModalOpen(true);
+  };
+
+  const getActionButton = (status: string, submissionId: string) => {
     switch (status) {
-      case 'Pending Review':
+      case 'Pending Acceptance':
         return (
           <div className="flex gap-2">
-            <button className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">
+            <button
+              onClick={() => handleApprove(submissionId)}
+              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+            >
               Approve
             </button>
-            <button className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">
+            <button
+              onClick={() => handleReject(submissionId)}
+              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+            >
               Reject
             </button>
           </div>
         );
-      case 'Approved':
+      case 'Requires Completion':
         return (
-          <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">
+          <span className="text-sm text-gray-500">Awaiting Delivery</span>
+        );
+      case 'Pending Delivery Review':
+        return (
+          <button
+            onClick={() => handleMarkComplete(submissionId)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+          >
             Mark Complete & Pay
           </button>
         );
@@ -83,10 +175,24 @@ export default function RecruiterSubmissionsView() {
         return (
           <span className="text-sm text-gray-500">Paid</span>
         );
+      case 'Rejected':
+        return (
+          <span className="text-sm text-gray-500">Rejected</span>
+        );
       default:
         return null;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-center items-center h-64">
+          <p className="text-gray-600">Loading submissions...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -125,11 +231,13 @@ export default function RecruiterSubmissionsView() {
                 {submissions.map((submission) => (
                   <tr key={submission.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{submission.gigTitle}</div>
+                      <div className="text-sm font-medium text-gray-900">{submission.listing.title}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{submission.earnerName}</div>
-                      <div className="text-sm text-gray-500">{submission.earnerEmail}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {submission.earner.name || 'Unknown'}
+                      </div>
+                      <div className="text-sm text-gray-500">{submission.earner.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -141,14 +249,17 @@ export default function RecruiterSubmissionsView() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(submission.submittedDate).toLocaleDateString()}
+                      {new Date(submission.submittedAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600">
-                      {submission.pay}
+                      {formatCurrency(Number(submission.listing.amount), submission.listing.currency)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex gap-2 items-center">
-                        <button className="text-indigo-600 hover:text-indigo-900 font-medium">
+                        <button 
+                          onClick={() => handleViewDetails(submission)}
+                          className="text-indigo-600 hover:text-indigo-900 font-medium"
+                        >
                           View Details
                         </button>
                         {getActionButton(submission.status, submission.id)}
@@ -181,6 +292,15 @@ export default function RecruiterSubmissionsView() {
           <p className="text-gray-600">Applications to your job postings will appear here</p>
         </div>
       )}
+
+      <ViewSubmissionDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedSubmission(null);
+        }}
+        submission={selectedSubmission}
+      />
     </div>
   );
 }

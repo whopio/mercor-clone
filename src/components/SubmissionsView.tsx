@@ -1,38 +1,95 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import SubmitDeliveryModal from '@/components/SubmitDeliveryModal';
+
+interface Submission {
+  id: string;
+  status: string;
+  submittedAt: string;
+  listing: {
+    id: string;
+    title: string;
+    amount: number;
+    currency: string;
+    recruiter: {
+      name: string | null;
+      email: string;
+    };
+  };
+}
+
 export default function SubmissionsView() {
-  // Sample submissions data
-  const submissions = [
-    {
-      id: 1,
-      title: 'Social Media Content Creation',
-      company: 'TechCorp Inc.',
-      status: 'Under Review',
-      submittedDate: '2025-11-08',
-      pay: '$500',
-    },
-    {
-      id: 2,
-      title: 'Product Photography',
-      company: 'Fashion Forward',
-      status: 'Approved',
-      submittedDate: '2025-11-05',
-      pay: '$800',
-    },
-  ];
+  const { data: session } = useSession();
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchSubmissions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id]);
+
+  const formatCurrency = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  };
+
+  const fetchSubmissions = async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      const response = await fetch(`/api/submissions?userId=${session.user.id}`);
+      const data = await response.json();
+      setSubmissions(data.submissions || []);
+    } catch (error) {
+      console.error('Failed to fetch submissions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmitDelivery = (submission: Submission) => {
+    setSelectedSubmission(submission);
+    setIsDeliveryModalOpen(true);
+  };
+
+  const handleDeliverySuccess = () => {
+    fetchSubmissions();
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Approved':
+      case 'Requires Completion':
         return 'bg-green-100 text-green-800';
-      case 'Under Review':
+      case 'Pending Acceptance':
         return 'bg-yellow-100 text-yellow-800';
+      case 'Pending Delivery Review':
+        return 'bg-purple-100 text-purple-800';
+      case 'Completed':
+        return 'bg-blue-100 text-blue-800';
       case 'Rejected':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-center items-center h-64">
+          <p className="text-gray-600">Loading your submissions...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -71,10 +128,12 @@ export default function SubmissionsView() {
                 {submissions.map((submission) => (
                   <tr key={submission.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{submission.title}</div>
+                      <div className="text-sm font-medium text-gray-900">{submission.listing.title}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-600">{submission.company}</div>
+                      <div className="text-sm text-gray-600">
+                        {submission.listing.recruiter.name || submission.listing.recruiter.email}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -86,15 +145,24 @@ export default function SubmissionsView() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(submission.submittedDate).toLocaleDateString()}
+                      {new Date(submission.submittedAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600">
-                      {submission.pay}
+                      {formatCurrency(Number(submission.listing.amount), submission.listing.currency)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button className="text-indigo-600 hover:text-indigo-900 font-medium">
-                        View Details
-                      </button>
+                      {submission.status === 'Requires Completion' ? (
+                        <button
+                          onClick={() => handleSubmitDelivery(submission)}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+                        >
+                          Submit Delivery
+                        </button>
+                      ) : (
+                        <button className="text-indigo-600 hover:text-indigo-900 font-medium">
+                          View Details
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -123,6 +191,16 @@ export default function SubmissionsView() {
           <p className="text-gray-600">Start applying to gigs to see your submissions here</p>
         </div>
       )}
+
+      <SubmitDeliveryModal
+        isOpen={isDeliveryModalOpen}
+        onClose={() => {
+          setIsDeliveryModalOpen(false);
+          setSelectedSubmission(null);
+        }}
+        onSuccess={handleDeliverySuccess}
+        submission={selectedSubmission}
+      />
     </div>
   );
 }

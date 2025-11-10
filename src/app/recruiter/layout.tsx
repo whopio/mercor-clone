@@ -50,6 +50,16 @@ export default function RecruiterLayout({
               >
                 Submissions
               </button>
+              <button
+                onClick={() => handleTabChange('balance')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  pathname === '/recruiter/balance'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Balance
+              </button>
             </div>
           </div>
         </div>
