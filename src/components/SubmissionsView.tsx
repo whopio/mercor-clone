@@ -67,17 +67,17 @@ export default function SubmissionsView() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Requires Completion':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
       case 'Pending Acceptance':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200';
       case 'Pending Delivery Review':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200';
       case 'Completed':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
       case 'Rejected':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
     }
   };
 
@@ -85,7 +85,7 @@ export default function SubmissionsView() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-center items-center h-64">
-          <p className="text-gray-600">Loading your submissions...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading your submissions...</p>
         </div>
       </div>
     );
@@ -94,44 +94,44 @@ export default function SubmissionsView() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">My Submissions</h2>
-        <p className="text-gray-600">Track your applications and their status</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">My Submissions</h2>
+        <p className="text-gray-600 dark:text-gray-400">Track your applications and their status</p>
       </div>
 
       {submissions.length > 0 ? (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Gig
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Company
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Submitted
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Pay
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {submissions.map((submission) => (
-                  <tr key={submission.id} className="hover:bg-gray-50">
+                  <tr key={submission.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{submission.listing.title}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{submission.listing.title}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         {submission.listing.recruiter.name || submission.listing.recruiter.email}
                       </div>
                     </td>
@@ -144,22 +144,22 @@ export default function SubmissionsView() {
                         {submission.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                       {new Date(submission.submittedAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600 dark:text-indigo-400">
                       {formatCurrency(Number(submission.listing.amount), submission.listing.currency)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {submission.status === 'Requires Completion' ? (
                         <button
                           onClick={() => handleSubmitDelivery(submission)}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+                          className="bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
                         >
                           Submit Delivery
                         </button>
                       ) : (
-                        <button className="text-indigo-600 hover:text-indigo-900 font-medium">
+                        <button className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 font-medium">
                           View Details
                         </button>
                       )}
@@ -171,8 +171,8 @@ export default function SubmissionsView() {
           </div>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-          <div className="text-gray-400 mb-4">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-12 text-center">
+          <div className="text-gray-400 dark:text-gray-600 mb-4">
             <svg
               className="mx-auto h-12 w-12"
               fill="none"
@@ -187,8 +187,8 @@ export default function SubmissionsView() {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No submissions yet</h3>
-          <p className="text-gray-600">Start applying to gigs to see your submissions here</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No submissions yet</h3>
+          <p className="text-gray-600 dark:text-gray-400">Start applying to gigs to see your submissions here</p>
         </div>
       )}
 

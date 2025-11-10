@@ -13,6 +13,7 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
   const [amount, setAmount] = useState('');
   const [showCheckout, setShowCheckout] = useState(false);
   const [planId, setPlanId] = useState<string | null>(null);
+  const [checkoutConfigId, setCheckoutConfigId] = useState<string | null>(null);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [error, setError] = useState('');
 
@@ -36,6 +37,7 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
     setAmount('');
     setShowCheckout(false);
     setPlanId(null);
+    setCheckoutConfigId(null);
     setError('');
     onClose();
   };
@@ -78,6 +80,7 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
       }
 
       setPlanId(data.planId);
+      setCheckoutConfigId(data.checkoutConfigId);
       setShowCheckout(true);
     } catch (error) {
       setError('Something went wrong');
@@ -96,13 +99,13 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">Add Funds</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Add Funds</h2>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <svg
               className="w-6 h-6"
@@ -124,17 +127,17 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
           {!showCheckout ? (
             <>
               {error && (
-                <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+                <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
                   {error}
                 </div>
               )}
 
               <div className="mb-6">
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Amount to Add (USD)
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500 text-lg">
+                  <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500 dark:text-gray-400 text-lg">
                     $
                   </span>
                   <input
@@ -144,19 +147,19 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
                     step="0.01"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="w-full pl-9 pr-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-9 pr-4 py-3 text-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                     placeholder="100.00"
                     autoFocus
                   />
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                   Minimum amount: $1.00
                 </p>
               </div>
 
-              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
-                <h3 className="font-semibold text-indigo-900 mb-2">How it works:</h3>
-                <ul className="text-sm text-indigo-800 space-y-1">
+              <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-indigo-900 dark:text-indigo-300 mb-2">How it works:</h3>
+                <ul className="text-sm text-indigo-800 dark:text-indigo-400 space-y-1">
                   <li>• Enter the amount you want to add to your balance</li>
                   <li>• Complete the secure checkout process</li>
                   <li>• Funds will be added to your account immediately</li>
@@ -168,14 +171,14 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleProceed}
                   disabled={isCreatingSession}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-md hover:bg-indigo-700 dark:hover:bg-indigo-600 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isCreatingSession ? 'Processing...' : 'Proceed to Checkout'}
                 </button>
@@ -183,14 +186,15 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
             </>
           ) : (
             <div className="min-h-[500px]">
-              {planId && (
+              {planId && checkoutConfigId && (
                 <WhopCheckoutEmbed
                   planId={planId}
+                  sessionId={checkoutConfigId}
                   onComplete={handleCheckoutComplete}
                   theme="light"
                   fallback={
                     <div className="flex items-center justify-center h-96">
-                      <p className="text-gray-600">Loading checkout...</p>
+                      <p className="text-gray-600 dark:text-gray-400">Loading checkout...</p>
                     </div>
                   }
                 />

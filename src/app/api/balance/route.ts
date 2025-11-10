@@ -13,6 +13,16 @@ export async function GET(request: Request) {
       );
     }
 
+    // Fetch all payments for the recruiter
+    const payments = await prisma.payment.findMany({
+      where: {
+        recruiterId: session.user.id,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
     // Fetch all ledger entries for the recruiter
     const entries = await prisma.ledgerEntry.findMany({
       where: {
@@ -39,6 +49,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       balance: balance || 0,
       currency: 'USD',
+      payments: payments || [],
       entries: entries || [],
     });
   } catch (error) {

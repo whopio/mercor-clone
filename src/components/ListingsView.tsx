@@ -64,7 +64,7 @@ export default function ListingsView() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-center items-center h-64">
-          <p className="text-gray-600">Loading available gigs...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading available gigs...</p>
         </div>
       </div>
     );
@@ -73,13 +73,13 @@ export default function ListingsView() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Available Gigs</h2>
-        <p className="text-gray-600">Browse and apply to available opportunities</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Available Gigs</h2>
+        <p className="text-gray-600 dark:text-gray-400">Browse and apply to available opportunities</p>
       </div>
 
       {listings.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-          <div className="text-gray-400 mb-4">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-12 text-center">
+          <div className="text-gray-400 dark:text-gray-600 mb-4">
             <svg
               className="mx-auto h-12 w-12"
               fill="none"
@@ -94,35 +94,35 @@ export default function ListingsView() {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No gigs available yet</h3>
-          <p className="text-gray-600">Check back soon for new opportunities!</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No gigs available yet</h3>
+          <p className="text-gray-600 dark:text-gray-400">Check back soon for new opportunities!</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {listings.map((listing) => (
             <div
               key={listing.id}
-              className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
             >
               <div className="mb-4">
-                <span className="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded">
+                <span className="inline-block bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs font-semibold px-2.5 py-1 rounded">
                   {listing.type}
                 </span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">{listing.title}</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{listing.title}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 {listing.recruiter.name || listing.recruiter.email}
               </p>
-              <p className="text-gray-700 mb-4 line-clamp-3">{listing.description}</p>
+              <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">{listing.description}</p>
               <div className="flex justify-between items-center mb-4">
-                <span className="text-lg font-bold text-indigo-600">
+                <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
                   {formatCurrency(Number(listing.amount), listing.currency)}
                 </span>
-                <span className="text-sm text-gray-500">{listing.duration}</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{listing.duration}</span>
               </div>
               <button
                 onClick={() => handleApplyClick(listing)}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition-colors"
+                className="w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white py-2 rounded-lg font-medium transition-colors"
               >
                 Apply Now
               </button>
