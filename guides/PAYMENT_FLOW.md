@@ -1,10 +1,10 @@
 # Payment and Payout Flow
 
-This document explains how payments work in Swift Gig, from recruiter adding funds to earner receiving payouts.
+This document explains how payments work in this example repository, from recruiter adding funds to earner receiving payouts.
 
 ## Overview
 
-Swift Gig uses [Whop](https://whop.com) for payment processing and fund transfers. The platform charges a **5% fee** on all completed gigs.
+The application uses [Whop](https://whop.com) for payment processing and fund transfers. The platform charges a **5% fee** on all completed gigs.
 
 ## Flow Diagram
 
