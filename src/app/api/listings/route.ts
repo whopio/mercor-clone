@@ -76,10 +76,28 @@ export async function GET(request: Request) {
     let listings;
 
     if (userId) {
-      // Get listings for a specific recruiter
+      // Getting a specific recruiter's listings (private - includes submissions)
+      // Must be authenticated and can only access own listings
+      const session = await auth();
+
+      if (!session || !session.user) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
+
+      // Security check: can only get your own listings
+      if (userId !== session.user.id) {
+        return NextResponse.json(
+          { error: 'Forbidden: You can only access your own listings' },
+          { status: 403 }
+        );
+      }
+
       listings = await prisma.listing.findMany({
         where: {
-          recruiterId: userId,
+          recruiterId: session.user.id,
         },
         include: {
           recruiter: {
@@ -96,7 +114,7 @@ export async function GET(request: Request) {
         },
       });
     } else {
-      // Get all active listings
+      // Get all active listings (public - no submissions data)
       listings = await prisma.listing.findMany({
         where: {
           status: 'Active',
@@ -109,7 +127,6 @@ export async function GET(request: Request) {
               email: true,
             },
           },
-          submissions: true,
         },
         orderBy: {
           createdAt: 'desc',

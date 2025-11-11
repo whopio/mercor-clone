@@ -8,7 +8,13 @@ The admin panel provides administrative tools for managing the Swift Gig platfor
 
 **URL:** `/admin`
 
-**Authentication:** Requires a valid user session (any authenticated user can access)
+**Authentication:** Requires admin privileges (`isAdmin: true` in the User table)
+
+**Authorization:**
+- User must be logged in
+- User must have `isAdmin` field set to `true` in the database
+- Non-admin users will be redirected to `/earner/listings`
+- Unauthenticated users will be redirected to `/auth/signin`
 
 ## Features
 
@@ -113,11 +119,47 @@ When a payment is connected:
 
 ### Security Considerations
 
-⚠️ **Important:**
-- Currently accessible to any authenticated user
-- Consider adding role-based access control for production
+✅ **Security Features:**
+- Only users with `isAdmin: true` can access `/admin` routes
+- Middleware checks authentication and admin status
+- API routes verify admin privileges before processing
+- Non-admin users are redirected automatically
 - All actions are logged to the console
 - Payment API calls use the platform's `WHOP_API_KEY`
+
+## Granting Admin Access
+
+To grant admin privileges to a user:
+
+### Method 1: Using Prisma Studio
+
+1. Run `pnpm prisma studio` (opens at http://localhost:5555)
+2. Navigate to the `User` table
+3. Find the user you want to make admin
+4. Click on the user's row
+5. Set `isAdmin` to `true`
+6. Save changes
+
+### Method 2: Using Database Query
+
+Execute this SQL query in your database:
+
+```sql
+UPDATE "User" SET "isAdmin" = true WHERE email = 'admin@example.com';
+```
+
+### Method 3: Using Prisma Client (in code/script)
+
+```typescript
+import { prisma } from '@/lib/prisma';
+
+await prisma.user.update({
+  where: { email: 'admin@example.com' },
+  data: { isAdmin: true },
+});
+```
+
+⚠️ **Important:** There is currently no UI for granting admin access. It must be done directly in the database.
 
 ## Environment Variables Required
 
@@ -128,9 +170,11 @@ WHOP_API_KEY=your_whop_api_key
 ## Future Enhancements
 
 Potential features to add:
-- Role-based access control (admin-only access)
-- Activity log/audit trail
+- UI for granting/revoking admin access
+- Activity log/audit trail for admin actions
 - Bulk payment import
+- User management dashboard
+- Platform analytics and reporting
 - Payment reconciliation tools
 - User management features
 - Listing management tools

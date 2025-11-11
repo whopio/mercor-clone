@@ -45,7 +45,8 @@ export default function SubmissionsView() {
     if (!session?.user?.id) return;
 
     try {
-      const response = await fetch(`/api/submissions?userId=${session.user.id}`);
+      // API automatically returns submissions for the authenticated user
+      const response = await fetch('/api/submissions');
       const data = await response.json();
       setSubmissions(data.submissions || []);
     } catch (error) {

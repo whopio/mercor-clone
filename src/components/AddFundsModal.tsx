@@ -90,7 +90,7 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
     }
   };
 
-  const handleCheckoutComplete = (planId: string, receiptId: string) => {
+  const handleCheckoutComplete = (planId: string, receiptId?: string) => {
     console.log('Checkout completed:', planId, receiptId);
     onSuccess();
     handleClose();

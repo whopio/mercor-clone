@@ -13,6 +13,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check if user is admin
+    if (!session.user.isAdmin) {
+      return NextResponse.json(
+        { error: 'Forbidden: Admin access required' },
+        { status: 403 }
+      );
+    }
+
     const { paymentId, recruiterEmail } = await request.json();
 
     // Validate inputs

@@ -116,13 +116,11 @@ export async function GET(request: Request) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    // Get submissions for the logged-in user
+    // Only allow users to get their own submissions
+    // Always use session.user.id - ignore any userId query parameter
     const submissions = await prisma.submission.findMany({
       where: {
-        earnerId: userId || session.user.id,
+        earnerId: session.user.id,
       },
       include: {
         listing: {
