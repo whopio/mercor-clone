@@ -1,6 +1,6 @@
 # Mercor Clone - Whop Rails Demo
 
-Mercor Clone is a demo marketplace application showcasing how to implement **[Whop Rails](https://whop.com/rails)**, a payments platform that enables you to operate marketplaces and platforms with ease.
+Mercor Clone is a demo marketplace application showcasing how to implement **[Whop Rails](https://whop.com/sell/platform)**, a payments platform that enables you to operate marketplaces and platforms with ease.
 
 This project demonstrates a complete end-to-end implementation of:
 - **Payins**: Accept payments from buyers (recruiters posting gigs)
