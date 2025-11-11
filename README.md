@@ -1,10 +1,6 @@
-# Swift Gig - Whop Rails Demo
+# Mercor Clone - Whop Rails Demo
 
-![Swift Gig](https://content.whop.com/docs/swift-gig.png)
-
-## Overview
-
-Swift Gig is a demo marketplace application showcasing how to implement **[Whop Rails](https://whop.com/rails)**, a payments platform that enables you to operate marketplaces and platforms with ease.
+Mercor Clone is a demo marketplace application showcasing how to implement **[Whop Rails](https://whop.com/rails)**, a payments platform that enables you to operate marketplaces and platforms with ease.
 
 This project demonstrates a complete end-to-end implementation of:
 - **Payins**: Accept payments from buyers (recruiters posting gigs)
@@ -47,7 +43,7 @@ Create a `.env` file in the root directory:
 
 ```env
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/swiftgig?schema=public"
+DATABASE_URL="postgresql://user:password@localhost:5432/mercorclone?schema=public"
 
 # Auth - Generate a secret with: openssl rand -base64 32
 NEXTAUTH_URL="http://localhost:3000"
@@ -68,7 +64,7 @@ You have two options:
 #### Option B: Use Local PostgreSQL
 
 1. Install PostgreSQL locally
-2. Create a database: `createdb swiftgig`
+2. Create a database: `createdb mercorclone`
 3. Update `DATABASE_URL` in `.env` with your local connection string
 
 ### 4. Run Database Migrations

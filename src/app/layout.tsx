@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Swift Gig - Gig Marketplace",
+  title: "Mercor Clone - Gig Marketplace",
   description: "Connect brands with talented earners for gig work",
 };
 

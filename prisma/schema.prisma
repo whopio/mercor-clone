@@ -24,7 +24,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   
-  // Swift Gig specific relations
+  // Specific relations
   listings      Listing[]      @relation("RecruiterListings")
   submissions   Submission[]   @relation("EarnerSubmissions")
   payments      Payment[]      @relation("RecruiterPayments")
@@ -67,7 +67,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Swift Gig specific models
+// Specific models
 model Listing {
   id          String   @id @default(cuid())
   title       String

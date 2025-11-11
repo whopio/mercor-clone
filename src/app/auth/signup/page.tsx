@@ -59,7 +59,7 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Swift Gig</h1>
+          <h1 className="text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">Mercor Clone</h1>
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Create your account</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{' '}

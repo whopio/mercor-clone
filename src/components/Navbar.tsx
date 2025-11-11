@@ -17,7 +17,7 @@ export default function Navbar({ userRole, onRoleSwitch }: NavbarProps) {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Swift Gig</h1>
+            <h1 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Mercor Clone</h1>
           </div>
 
           {/* User Actions */}
