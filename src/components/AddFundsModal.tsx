@@ -191,7 +191,7 @@ export default function AddFundsModal({ isOpen, onClose, onSuccess }: AddFundsMo
                   planId={planId}
                   sessionId={checkoutConfigId}
                   onComplete={handleCheckoutComplete}
-                  theme="light"
+                  theme="system"
                   fallback={
                     <div className="flex items-center justify-center h-96">
                       <p className="text-gray-600 dark:text-gray-400">Loading checkout...</p>
