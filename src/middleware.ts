@@ -10,17 +10,20 @@ export default auth((req) => {
   if (pathname.startsWith('/admin')) {
     if (!isLoggedIn) {
       // Redirect to signin if not logged in
-      return NextResponse.redirect(new URL('/auth/signin', req.url));
+      const signInUrl = new URL('/auth/signin', req.nextUrl.origin);
+      return NextResponse.redirect(signInUrl);
     }
     if (!isAdmin) {
       // Redirect to home if not admin
-      return NextResponse.redirect(new URL('/earner/listings', req.url));
+      const homeUrl = new URL('/earner/listings', req.nextUrl.origin);
+      return NextResponse.redirect(homeUrl);
     }
   }
 
   // Check if accessing protected routes (earner/recruiter)
   if ((pathname.startsWith('/earner') || pathname.startsWith('/recruiter')) && !isLoggedIn) {
-    return NextResponse.redirect(new URL('/auth/signin', req.url));
+    const signInUrl = new URL('/auth/signin', req.nextUrl.origin);
+    return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();
