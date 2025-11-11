@@ -95,7 +95,6 @@ Swift Gig uses [Whop](https://whop.com) for payment processing and fund transfer
 
 4. **Update Database (Transaction):**
    - Create debit `LedgerEntry` for recruiter (-$100.00)
-   - Create credit `LedgerEntry` for platform fee (+$5.00)
    - Update submission status to `Completed`
    - Save Whop `transferId` on submission
 
@@ -184,44 +183,6 @@ function calculateBalance(entries) {
 }
 ```
 
-## Example Ledger History
-
-| Type | Amount | Description | Balance |
-|------|--------|-------------|---------|
-| Credit | +$100.00 | Funds added via Whop | $100.00 |
-| Debit | -$50.00 | Payment for "Social Media Post" | $50.00 |
-| Credit | +$2.50 | Platform fee (5% of $50) | $52.50 |
-| Debit | -$30.00 | Payment for "Logo Design" | $22.50 |
-| Credit | +$1.50 | Platform fee (5% of $30) | $24.00 |
-
-**Note:** Platform fees are recorded as credits to track platform revenue per recruiter.
-
-## Error Handling
-
-### Common Errors
-
-1. **"Earner has not set up payouts yet"**
-   - Earner must complete payout setup at `/earner/payouts`
-   - They need a `WhopCompany` record
-
-2. **"Insufficient balance"**
-   - Recruiter needs to add funds at `/recruiter/balance`
-   - Balance must be ≥ listing amount
-
-3. **"Submission must be in 'Pending Delivery Review' status"**
-   - Only submissions with delivered work can be completed
-   - Earner must submit delivery materials first
-
-4. **"Submission has already been paid"**
-   - Submission has a `transferId` already
-   - Cannot process payment twice (idempotency protection)
-
-5. **Whop Transfer Errors**
-   - Invalid company IDs
-   - Transfer amount too small/large
-   - Currency mismatch
-   - Network/API errors
-
 ## Environment Variables Required
 
 ```bash
@@ -251,32 +212,3 @@ PLATFORM_COMPANY_ID=biz_xxxxxxxxxxxxx
 4. **Webhook Verification:**
    - Whop webhooks should verify signatures (TODO)
    - Currently trusts all webhook payloads
-
-## Testing Checklist
-
-- [ ] Recruiter can add funds via Whop
-- [ ] Webhook creates payment and ledger entry
-- [ ] Balance displays correctly
-- [ ] Earner can set up payouts
-- [ ] Submission flow works end-to-end
-- [ ] Complete & Pay validates earner has WhopCompany
-- [ ] Complete & Pay checks sufficient balance
-- [ ] Transfer is created in Whop
-- [ ] Submission status updates to Completed
-- [ ] TransferId is saved on submission
-- [ ] Ledger entries created (debit + platform fee)
-- [ ] Balance updates after payment
-- [ ] Cannot pay same submission twice
-- [ ] Error messages are user-friendly
-
-## Future Enhancements
-
-1. **Webhook signature verification**
-2. **Refund handling**
-3. **Dispute resolution**
-4. **Multiple currencies**
-5. **Configurable platform fee**
-6. **Payout schedule (immediate vs batched)**
-7. **Email notifications on payment events**
-8. **Payment receipts/invoices**
-

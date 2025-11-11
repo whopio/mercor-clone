@@ -4,14 +4,13 @@ This guide explains how to set up Whop's embedded checkout for adding funds to r
 
 ## Prerequisites
 
-1. A Whop account ([signup at whop.com](https://whop.com))
+1. A Whop account ([signup at whop.com](https://whop.com/sell))
 2. Access to your Whop dashboard
 
 ## Step 1: Get Your Whop Company ID
 
-1. Go to your [Whop Dashboard](https://whop.com/hub)
-2. Navigate to **Settings** > **Company**
-3. Copy your **Company ID** (starts with `biz_`)
+1. Go to your [Whop Dashboard](https://whop.com/dashboard)
+2. Copy the ID from the URL. It should look like https://whop.com/dashboard/biz_xxxxxxxxxxxx
    
 **Note:** You don't need to manually create products or plans. The API will create one-time payment plans dynamically based on the amount the user enters.
 
@@ -21,19 +20,19 @@ Add these variables to your `.env.local` file:
 
 ```bash
 # Whop Configuration
-WHOP_COMPANY_ID="biz_XXXXXXXXX"        # Your Whop company ID from Step 1
+PLATFORM_COMPANY_ID="biz_XXXXXXXXX"        # Your Whop company ID from Step 1
 WHOP_API_KEY="whop_XXXXXXXXX"          # Your Whop API key (get from dashboard)
 WHOP_WEBHOOK_SECRET="whsec_XXXXXXXXX"  # Your Whop webhook secret (get from webhook setup)
 ```
 
 ### Getting Your API Key:
-1. Go to **Settings** > **API Keys** in your Whop dashboard
+1. Go to **Developer** > **API Keys** in your [Whop dashboard](https://whop.com/dashboard)
 2. Create a new API key with appropriate permissions
 3. Copy the key and add it to your `.env.local`
 
 ## Step 3: Set Up Webhooks
 
-1. In your Whop dashboard, go to **Settings** > **Webhooks**
+1. Go to **Developer** > **Webhooks** in your [Whop dashboard](https://whop.com/dashboard)
 2. Click **Add Endpoint**
 3. Set the URL to: `https://yourdomain.com/api/whop/events`
 4. Subscribe to these events:
@@ -155,26 +154,6 @@ For local development:
 - **Always verify webhook signatures** to ensure requests are from Whop
 - Store API keys securely (never commit to git)
 - Use HTTPS for all webhook endpoints
-- Implement rate limiting on the webhook endpoint
-- Log all transactions for audit trails
-
-## Troubleshooting
-
-### Checkout not loading:
-- Verify `NEXT_PUBLIC_WHOP_PLAN_ID` is set correctly
-- Check browser console for errors
-- Ensure the plan is active in Whop dashboard
-
-### Webhook not working:
-- Verify webhook URL is accessible from internet
-- Check webhook signature verification
-- Review Whop dashboard webhook logs
-- Check server logs for errors
-
-### Balance not updating:
-- Verify webhook is being received
-- Check ledger entry creation in database
-- Review idempotency key for duplicates
 
 ## Documentation References
 
