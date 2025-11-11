@@ -6,6 +6,7 @@ CREATE TABLE "User" (
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
     "password" TEXT NOT NULL,
+    "isAdmin" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -72,6 +73,7 @@ CREATE TABLE "Submission" (
     "status" TEXT NOT NULL DEFAULT 'Pending Acceptance',
     "submittedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "transferId" TEXT,
     "listingId" TEXT NOT NULL,
     "earnerId" TEXT NOT NULL,
 
@@ -134,6 +136,9 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token"
 
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationToken"("identifier", "token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Submission_transferId_key" ON "Submission"("transferId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Submission_listingId_earnerId_key" ON "Submission"("listingId", "earnerId");
