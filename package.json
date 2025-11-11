@@ -15,7 +15,6 @@
     "db:seed": "prisma db seed"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "2.11.1",
     "@prisma/client": "^6.19.0",
     "@whop/checkout": "^0.0.44",
     "bcryptjs": "^3.0.3",
