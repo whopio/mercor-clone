@@ -82,6 +82,47 @@ export default function SubmissionsView() {
     }
   };
 
+  // Show login prompt if not authenticated
+  if (!session) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">My Submissions</h2>
+          <p className="text-gray-600 dark:text-gray-400">Track your applications and their status</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-12 text-center">
+          <div className="text-gray-400 dark:text-gray-600 mb-4">
+            <svg
+              className="mx-auto h-16 w-16"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Sign in to view your submissions
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You need to be logged in to see your job applications and track their status.
+          </p>
+          <a
+            href="/auth/signin"
+            className="inline-block bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+          >
+            Sign In
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
