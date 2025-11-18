@@ -1,7 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import type { WhopElementsOptions } from "@whop/embedded-components-vanilla-js/types";
+import {
+  Elements,
+  PayoutsSession,
+  BalanceElement,
+  WithdrawButtonElement,
+} from "@whop/embedded-components-react-js";
+import { loadWhopElements } from "@whop/embedded-components-vanilla-js";
+
+const elements = loadWhopElements();
+
+const appearance: WhopElementsOptions["appearance"] = {
+  classes: {
+    ".Button": { height: "40px", "border-radius": "8px" },
+    ".Button:disabled": { "background-color": "gray" },
+    ".Container": { "border-radius": "12px" }
+  },
+};
 
 interface WhopCompany {
   id: string;
@@ -15,31 +33,21 @@ interface PayoutStatus {
   company: WhopCompany | null;
 }
 
-export default function PayoutsView() {
-  const { data: session } = useSession();
-  const [payoutStatus, setPayoutStatus] = useState<PayoutStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface PayoutsViewProps {
+  payoutStatus: PayoutStatus;
+}
+
+export default function PayoutsView({ payoutStatus }: PayoutsViewProps) {
+  const router = useRouter();
   const [isSettingUp, setIsSettingUp] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchPayoutStatus = async () => {
-    if (!session?.user?.id) return;
-
-    try {
-      const response = await fetch('/api/payouts/status');
-      const data = await response.json();
-      setPayoutStatus(data);
-    } catch (error) {
-      console.error('Failed to fetch payout status:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const fetchPayoutToken = async () => {
+    const response = await fetch('/api/payouts/status');
+    const data = await response.json();
+    
+    return data.token as string;
   };
-
-  useEffect(() => {
-    fetchPayoutStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id]);
 
   const handleSetupPayouts = async () => {
     setIsSettingUp(true);
@@ -61,8 +69,8 @@ export default function PayoutsView() {
         return;
       }
 
-      // Refresh status
-      await fetchPayoutStatus();
+      // Refresh the page to get updated status
+      router.refresh();
     } catch (error) {
       setError('Something went wrong');
       console.error('Setup payouts error:', error);
@@ -70,57 +78,6 @@ export default function PayoutsView() {
       setIsSettingUp(false);
     }
   };
-
-  // Show login prompt if not authenticated
-  if (!session) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Payouts</h2>
-          <p className="text-gray-600 dark:text-gray-400">Manage your earnings and payout settings</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-12 text-center">
-          <div className="text-gray-400 dark:text-gray-600 mb-4">
-            <svg
-              className="mx-auto h-16 w-16"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Sign in to manage payouts
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            You need to be logged in to set up your payout account and manage your earnings.
-          </p>
-          <a
-            href="/auth/signin"
-            className="inline-block bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-          >
-            Sign In
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-center items-center h-64">
-          <p className="text-gray-600 dark:text-gray-400">Loading payout information...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -159,10 +116,10 @@ export default function PayoutsView() {
               <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4 mb-6 text-left">
                 <h4 className="font-semibold text-indigo-900 dark:text-indigo-300 mb-2">What happens next:</h4>
                 <ul className="text-sm text-indigo-800 dark:text-indigo-400 space-y-2">
-                  <li>• We'll create a secure payout account for you</li>
+                  <li>• We&apos;ll create a secure payout account for you</li>
                   <li>• Your earnings from completed gigs will be tracked</li>
-                  <li>• You'll be able to withdraw funds according to the platform terms</li>
-                  <li>• All transactions are secured by Whop's payment infrastructure</li>
+                  <li>• You&apos;ll be able to withdraw funds according to the platform terms</li>
+                  <li>• All transactions are secured by Whop&apos;s payment infrastructure</li>
                 </ul>
               </div>
             </div>
@@ -222,39 +179,30 @@ export default function PayoutsView() {
             </div>
           </div>
 
-          {/* Placeholder for Whop Payouts Component */}
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 rounded-lg shadow-lg p-8 text-white">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
-                <svg
-                  className="w-8 h-8"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold mb-2">Whop Payouts Integration</h3>
-              <p className="text-white/90 mb-4">
-                Detailed payout management and withdrawal features coming soon
-              </p>
-              <p className="text-sm text-white/75">
-                Your account is set up and ready to receive payments for completed gigs
-              </p>
-            </div>
+          {/* Whop Payouts Component */}
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+              Balance & Withdrawals
+            </h3>
+            <Elements appearance={appearance} elements={elements}>
+                <PayoutsSession token={fetchPayoutToken} currency="USD">
+                  <div className="space-y-3">
+                    <div>
+                      <BalanceElement fallback={<div className="text-gray-600 dark:text-gray-400">Loading balance...</div>} />
+                    </div>
+                    <div className="h-[40px]">
+                      <WithdrawButtonElement fallback={<div className="text-gray-600 dark:text-gray-400">Loading...</div>} />
+                    </div>
+                  </div>
+                </PayoutsSession>
+              </Elements>
           </div>
 
           {/* Info Card */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
             <div className="flex">
               <svg
-                className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0"
+                className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-3 shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -272,7 +220,7 @@ export default function PayoutsView() {
                 </h4>
                 <p className="text-sm text-blue-800 dark:text-blue-400">
                   When a recruiter marks your submission as complete, your earnings will be tracked 
-                  in your payout account. Funds can be withdrawn according to the platform's payout schedule.
+                  in your payout account. Funds can be withdrawn according to the platform&apos;s payout schedule.
                 </p>
               </div>
             </div>

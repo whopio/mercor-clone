@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { whopSdk } from '@/lib/whop-sdk';
 
 export async function POST(request: Request) {
   try {
@@ -55,24 +56,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // Retrieve payment from Whop API
-    const whopResponse = await fetch(`https://api.whop.com/api/v1/payments/${paymentId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${process.env.WHOP_API_KEY}`,
-      },
-    });
+    // Retrieve payment from Whop SDK
+    let whopPaymentData;
+    try {
+      whopPaymentData = await whopSdk.payments.retrieve(paymentId);
 
-    if (!whopResponse.ok) {
-      const errorData = await whopResponse.json();
-      console.error('Whop API error:', errorData);
+      if (!whopPaymentData) {
+        throw new Error('No payment data returned from Whop');
+      }
+    } catch (whopError) {
+      console.error('Whop SDK error:', whopError);
       return NextResponse.json(
-        { error: 'Failed to retrieve payment from Whop', details: errorData },
-        { status: whopResponse.status }
+        { error: 'Failed to retrieve payment from Whop', details: whopError instanceof Error ? whopError.message : 'Unknown error' },
+        { status: 500 }
       );
     }
-
-    const whopPaymentData = await whopResponse.json();
 
     // Extract payment details (matching webhook structure)
     const paymentAmount = whopPaymentData.total || 0;
@@ -86,7 +84,7 @@ export async function POST(request: Request) {
         amount: paymentAmount,
         currency: paymentCurrency,
         status: paymentStatus,
-        metadata: whopPaymentData as any,
+        metadata: JSON.parse(JSON.stringify(whopPaymentData)),
         recruiterId: recruiter.id,
       },
     });

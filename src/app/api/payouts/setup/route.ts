@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { whopSdk } from '@/lib/whop-sdk';
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const session = await auth();
 
@@ -38,38 +39,40 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create sub-company via Whop API
-    // Reference: https://docs.whop.com/api-reference/companies/create-company
-    const whopResponse = await fetch('https://api.whop.com/api/v1/companies', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.WHOP_API_KEY}`,
-      },
-      body: JSON.stringify({
-        email: user.email,
-        parent_company_id: process.env.PLATFORM_COMPANY_ID,
-        title: user.name || user.email.split('@')[0],
-      }),
-    });
-
-    if (!whopResponse.ok) {
-      const errorData = await whopResponse.json();
-      console.error('Whop API error:', errorData);
+    if (!process.env.PLATFORM_COMPANY_ID) {
       return NextResponse.json(
-        { error: 'Failed to create payout account', details: errorData },
-        { status: whopResponse.status }
+        { error: 'PLATFORM_COMPANY_ID is not set' },
+        { status: 500 }
       );
     }
 
-    const whopCompanyData = await whopResponse.json();
+    // Create sub-company via Whop SDK
+    // Reference: https://docs.whop.com/api-reference/companies/create-company
+    let whopCompanyData;
+    try {
+      whopCompanyData = await whopSdk.companies.create({
+        email: user.email,
+        parent_company_id: process.env.PLATFORM_COMPANY_ID,
+        title: user.name || user.email.split('@')[0],
+      });
+
+      if (!whopCompanyData || !whopCompanyData.id) {
+        throw new Error('No company data returned from Whop');
+      }
+    } catch (whopError) {
+      console.error('Whop SDK error:', whopError);
+      return NextResponse.json(
+        { error: 'Failed to create payout account', details: whopError instanceof Error ? whopError.message : 'Unknown error' },
+        { status: 500 }
+      );
+    }
 
     // Save Whop company to database
     const whopCompany = await prisma.whopCompany.create({
       data: {
         title: whopCompanyData.title,
         whopId: whopCompanyData.id,
-        metadata: whopCompanyData as any,
+        metadata: JSON.parse(JSON.stringify(whopCompanyData)),
         userId: session.user.id,
       },
     });

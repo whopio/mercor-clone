@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { createLedgerEntry, getRecruiterBalance } from '@/lib/ledger';
+import { whopSdk } from '@/lib/whop-sdk';
 
 const PLATFORM_FEE_PERCENTAGE = 0.05; // 5% platform fee
 
@@ -89,11 +90,10 @@ export async function POST(
     const platformFee = listingAmount * PLATFORM_FEE_PERCENTAGE;
     const earnerAmount = listingAmount - platformFee;
 
-    const whopApiKey = process.env.WHOP_API_KEY;
     const platformCompanyId = process.env.PLATFORM_COMPANY_ID;
 
-    if (!whopApiKey || !platformCompanyId) {
-      console.error('Missing WHOP_API_KEY or PLATFORM_COMPANY_ID');
+    if (!platformCompanyId) {
+      console.error('Missing PLATFORM_COMPANY_ID');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
@@ -103,15 +103,10 @@ export async function POST(
     // Create Whop transfer using submission ID as idempotency key
     const idempotencyKey = `submission_${submission.id}_payout`;
 
-    const transferResponse = await fetch('https://api.whop.com/api/v1/transfers', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${whopApiKey}`,
-      },
-      body: JSON.stringify({
+    try {
+      const transferData = await whopSdk.transfers.create({
         amount: earnerAmount,
-        currency: submission.listing.currency.toLowerCase(),
+        currency: submission.listing.currency.toLowerCase() as 'usd',
         origin_id: platformCompanyId,
         destination_id: submission.earner.whopCompany.whopId,
         idempotence_key: idempotencyKey,
@@ -125,19 +120,15 @@ export async function POST(
           platformFee: platformFee,
           earnerAmount: earnerAmount,
         },
-      }),
-    });
+      });
 
-    if (!transferResponse.ok) {
-      const errorData = await transferResponse.json();
-      console.error('Whop transfer error:', errorData);
-      return NextResponse.json(
-        { error: `Failed to create transfer: ${errorData.message || 'Unknown error'}` },
-        { status: transferResponse.status }
-      );
-    }
-
-    const transferData = await transferResponse.json();
+      if (!transferData || !transferData.id) {
+        console.error('Failed to create transfer: No transfer data returned');
+        return NextResponse.json(
+          { error: 'Failed to create transfer' },
+          { status: 500 }
+        );
+      }
 
     // Use a transaction to ensure all operations succeed or fail together
     const result = await prisma.$transaction(async (tx) => {
@@ -196,6 +187,13 @@ export async function POST(
         platformFee: platformFee,
       },
     });
+    } catch (transferError) {
+      console.error('Whop transfer error:', transferError);
+      return NextResponse.json(
+        { error: `Failed to create transfer: ${transferError instanceof Error ? transferError.message : 'Unknown error'}` },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error('Complete submission error:', error);
     return NextResponse.json(
