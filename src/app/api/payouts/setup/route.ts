@@ -39,6 +39,13 @@ export async function POST() {
       );
     }
 
+    if (!process.env.PLATFORM_COMPANY_ID) {
+      return NextResponse.json(
+        { error: 'PLATFORM_COMPANY_ID is not set' },
+        { status: 500 }
+      );
+    }
+
     // Create sub-company via Whop SDK
     // Reference: https://docs.whop.com/api-reference/companies/create-company
     let whopCompanyData;
