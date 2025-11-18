@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 export default async function PayoutsPage() {
   const session = await auth();
 
+  // Make sure the user is logged in
   if (!session?.user?.id) {
     redirect('/auth/signin');
   }
