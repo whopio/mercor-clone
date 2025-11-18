@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { whopSdk } from '@/lib/whop-sdk';
 
 export async function POST(request: Request) {
   try {
@@ -21,13 +22,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!process.env.WHOP_API_KEY) {
-      return NextResponse.json(
-        { error: 'Whop API key not configured' },
-        { status: 500 }
-      );
-    }
-
     if (!process.env.PLATFORM_COMPANY_ID) {
       return NextResponse.json(
         { error: 'Whop company ID not configured' },
@@ -35,14 +29,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create a checkout configuration with Whop API
-    const whopResponse = await fetch('https://api.whop.com/api/v1/checkout_configurations', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.WHOP_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    // Create a checkout configuration with Whop SDK
+    let checkoutConfig;
+    try {
+      checkoutConfig = await whopSdk.checkoutConfigurations.create({
         plan: {
           company_id: process.env.PLATFORM_COMPANY_ID,
           visibility: 'visible',
@@ -62,19 +52,18 @@ export async function POST(request: Request) {
         ...(process.env.HOST_URL && process.env.HOST_URL.startsWith('https://') 
           ? { redirect_url: process.env.HOST_URL }
           : {}),
-      }),
-    });
+      });
 
-    if (!whopResponse.ok) {
-      const errorData = await whopResponse.json().catch(() => ({}));
-      console.error('Whop API error:', errorData);
+      if (!checkoutConfig || !checkoutConfig.id) {
+        throw new Error('No checkout configuration returned from Whop');
+      }
+    } catch (whopError) {
+      console.error('Whop SDK error:', whopError);
       return NextResponse.json(
         { error: 'Failed to create checkout configuration' },
-        { status: whopResponse.status }
+        { status: 500 }
       );
     }
-
-    const checkoutConfig = await whopResponse.json();
     
     return NextResponse.json({
       checkoutConfigId: checkoutConfig.id,

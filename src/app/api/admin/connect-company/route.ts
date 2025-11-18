@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { whopSdk } from '@/lib/whop-sdk';
 
 export async function POST(request: Request) {
   try {
@@ -52,35 +53,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const whopApiKey = process.env.WHOP_API_KEY;
-    if (!whopApiKey) {
-      console.error('Missing WHOP_API_KEY environment variable');
+    // Fetch company details from Whop SDK
+    let companyData;
+    try {
+      companyData = await whopSdk.companies.retrieve(companyId);
+
+      if (!companyData || !companyData.id) {
+        throw new Error('No company data returned from Whop');
+      }
+    } catch (whopError) {
+      console.error('Whop SDK error:', whopError);
       return NextResponse.json(
-        { error: 'Server configuration error' },
+        { error: `Failed to fetch company from Whop: ${whopError instanceof Error ? whopError.message : 'Unknown error'}` },
         { status: 500 }
       );
     }
-
-    // Fetch company details from Whop API
-    const whopResponse = await fetch(
-      `https://api.whop.com/api/v1/companies/${companyId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${whopApiKey}`,
-        },
-      }
-    );
-
-    if (!whopResponse.ok) {
-      const errorData = await whopResponse.json();
-      console.error('Whop API error:', errorData);
-      return NextResponse.json(
-        { error: `Failed to fetch company from Whop: ${errorData.message || 'Unknown error'}` },
-        { status: whopResponse.status }
-      );
-    }
-
-    const companyData = await whopResponse.json();
 
     // Create WhopCompany record
     const whopCompany = await prisma.whopCompany.create({

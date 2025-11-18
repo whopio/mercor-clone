@@ -17,6 +17,9 @@
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "@whop/checkout": "^0.0.44",
+    "@whop/embedded-components-react-js": "^0.0.0",
+    "@whop/embedded-components-vanilla-js": "^0.0.0",
+    "@whop/sdk": "^0.0.7",
     "bcryptjs": "^3.0.3",
     "next": "16.0.1",
     "next-auth": "5.0.0-beta.30",
